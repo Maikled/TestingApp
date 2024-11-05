@@ -1,0 +1,41 @@
+﻿@using TestingApp.Areas.Authentication.Models
+
+@model RegistrationData
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<body>
+    <div>
+        <form asp-action="Registration" method="post">
+            <h3>Регистрация</h3>
+            <p>
+                <label asp-for="Login">Login</label>
+                <input asp-for="Login"/>
+            </p>
+            <p>
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password"/>
+            </p>
+            <p>
+                <label asp-for="PasswordConfirm">Confirm password</label>
+                <input asp-for="PasswordConfirm"/>
+            </p>
+            <p>
+                <label asp-for="Name">Name</label>
+                <input asp-for="Name"/>
+            </p>
+            <input type="submit" value="Зарегистрироваться"/>
+        </form>
+
+        <div>
+            @foreach(var error in ViewContext.ViewData.ModelState.Values.SelectMany(p => p.Errors))
+            {
+                <p>@error.ErrorMessage</p>
+            }
+        </div>
+    </div>
+</body>
+</html>
