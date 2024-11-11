@@ -1,10 +1,10 @@
-using TestingApp.Database;
 using TestingApp.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using TestingApp.Core.Models.Tests.DataProviders;
 using TestingApp.Core.Models.Tests;
 using TestingApp.Core.Processing.CSharp;
+using TestingApp.Database;
 
 namespace TestingApp
 {

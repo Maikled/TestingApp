@@ -1,9 +1,9 @@
 ﻿using TestingApp.Areas.Authentication.Models;
 using TestingApp.Areas.Authentication.Models.Configurations;
-using TestingApp.Database;
-using TestingApp.Database.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TestingApp.Core.Models.Identity;
+using TestingApp.Database;
 
 namespace TestingApp.Areas.Authentication.Controllers
 {

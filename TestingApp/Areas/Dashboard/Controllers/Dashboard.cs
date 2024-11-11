@@ -1,7 +1,7 @@
-﻿using TestingApp.Areas.Authentication.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using TestingApp.Core.Models.Identity;
+using TestingApp.Core.Models.Tests;
 using TestingApp.Database;
-using TestingApp.Database.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace TestingApp.Areas.Dashboard.Controllers
 {
@@ -9,6 +9,8 @@ namespace TestingApp.Areas.Dashboard.Controllers
     [Route("[controller]")]
     public class Dashboard : Controller
     {
+        public IEnumerable<Source>? Sources { get; set; }
+
         private DatabaseContext _databaseContext { get; }
 
         public Dashboard(DatabaseContext databaseContext)
@@ -20,7 +22,8 @@ namespace TestingApp.Areas.Dashboard.Controllers
         [Route("[action]")]
         public IActionResult General(User user)
         {
-            return View();
+            Sources = _databaseContext.Sources.Where(p => p.Owner == user);
+            return View(this);
         }
     }
 }
