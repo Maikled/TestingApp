@@ -39,7 +39,7 @@ namespace TestingApp.Areas.Authentication.Controllers
             var user = await _databaseContext.Users.FirstOrDefaultAsync(p => p.Login == authenticationData.Login && p.Password == authenticationData.Password);
             if (user != null)
             {
-                return RedirectToAction($"{nameof(Dashboard.Controllers.Dashboard.General)}", $"{nameof(Dashboard.Controllers.Dashboard)}", new { area = $"{nameof(Dashboard)}", user });
+                return RedirectToAction($"{nameof(Dashboard.Controllers.Dashboard.General)}", $"{nameof(Dashboard.Controllers.Dashboard)}", new { area = $"{nameof(Dashboard)}", userID = user.ID });
             }
             else
             {

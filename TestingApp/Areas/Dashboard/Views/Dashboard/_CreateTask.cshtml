@@ -1,0 +1,19 @@
+﻿@using TestingApp.Core.Models.Tests
+
+@model Source
+
+<div class="d-flex justify-content-center" ">
+    <div>
+        <h1>TestingApp</h1>
+    </div>
+
+    <form asp-action="CreateSource" method="post">
+        <div>
+            <input asp-for="Name"/>
+        </div>
+        <div>
+            <input asp-for="Code"/>
+        </div>
+    </form>
+
+</div>
