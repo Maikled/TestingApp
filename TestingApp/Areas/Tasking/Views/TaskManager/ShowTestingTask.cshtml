@@ -144,6 +144,45 @@
     .error-container ul li {
         font-size: 0.95rem;
     }
+
+    .run-test-button {
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .run-test-button:hover {
+        background-color: #0b5ed7;
+    }
+
+    .progress-ring {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 30px;
+        width: 30px;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #0d6efd;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 
 <div class="task-view-container">
@@ -170,7 +209,14 @@
                 <div class="test-expander" >
                     <div class="test-header" id="test-expander-@test.ID" onclick="toggleTestDetails('@test.ID')" style="color: @(testHistory?.IsSuccess == true ? "green" : testHistory?.IsSuccess == false ? "red" : "gray")">
                         <span>@test.Name</span>
-                        <button class="run-test-button" onclick="runTest('@test.ID', event)">Запустить</button>
+                        <div class="test-container">
+                            <button id="run-test-button" class="run-test-button" onclick="runTest('@test.ID', event, this)">
+                                Запустить
+                            </button>
+                            <div id="progress-ring" class="progress-ring" style="display: none;">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="test-details" id="test-details-@test.ID">
                         <p><strong>Входные данные:</strong> <code>@test.InputData</code></p>
@@ -212,7 +258,7 @@
         details.style.display = details.style.display === "none" || details.style.display === "" ? "block" : "none";
     }
 
-    function runTest(testId, event) {
+    function runTest(testId, event, button) {
         event.stopPropagation();
         const sourceCode = document.getElementById("sourceCode").value;
         if (!sourceCode.trim()) {
@@ -222,6 +268,11 @@
 
         let source = @Html.Raw(Json.Serialize(Model.Source));
         source.Code = sourceCode;
+
+        const progressRing = document.getElementById('progress-ring');
+        const runButton = button;
+        runButton.style.display = 'none';
+        progressRing.style.display = 'flex';
 
         fetch('/TaskManager/RunTest', {
             method: 'POST',
@@ -253,6 +304,9 @@
 
                     errorContainer.style.display = "block";
                 }
+
+                progressRing.style.display = 'none';
+                runButton.style.display = 'inline-block';
             });
     }
 

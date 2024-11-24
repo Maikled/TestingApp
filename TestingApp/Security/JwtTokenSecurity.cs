@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -15,7 +14,7 @@ namespace TestingApp.Security
 
         public JwtTokenSecurity()
         {
-            var pathToTokenFile = Path.Combine(Environment.CurrentDirectory, "Areas", "Authentication", "Data", "secretToken.txt");
+            var pathToTokenFile = Path.Combine(Environment.CurrentDirectory, "Security", "Data", "secretToken.txt");
             _tokenKey = LoadSecretTokenKey(pathToTokenFile);
         }
 
