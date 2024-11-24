@@ -11,14 +11,38 @@ using TestingApp.Database;
 namespace TestingApp.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241109165531_Add_test_entities")]
-    partial class Add_test_entities
+    [Migration("20241124165001_Change_TestExecuteHistory")]
+    partial class Change_TestExecuteHistory
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
+
+            modelBuilder.Entity("TestingApp.Areas.Tasking.Models.TestExecuteHistory", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Errors")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("OwnerUserID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TestID")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("TestsExecuteHistories");
+                });
 
             modelBuilder.Entity("TestingApp.Core.Models.Identity.User", b =>
                 {
@@ -38,6 +62,9 @@ namespace TestingApp.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("RoleType")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("ID");
 
                     b.ToTable("Users");
@@ -49,18 +76,42 @@ namespace TestingApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("OwnerID")
+                    b.Property<Guid>("OwnerTaskID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OwnerUserID")
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("OwnerID");
-
                     b.ToTable("Sources");
+                });
+
+            modelBuilder.Entity("TestingApp.Core.Models.Tests.TaskTesting", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OwnerUserID")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("OwnerUserID");
+
+                    b.ToTable("Tasks");
                 });
 
             modelBuilder.Entity("TestingApp.Core.Models.Tests.Test", b =>
@@ -81,49 +132,37 @@ namespace TestingApp.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("OwnerID")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("SourceID")
+                    b.Property<Guid?>("TaskTestingID")
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("OwnerID");
-
-                    b.HasIndex("SourceID");
+                    b.HasIndex("TaskTestingID");
 
                     b.ToTable("Tests");
                 });
 
-            modelBuilder.Entity("TestingApp.Core.Models.Tests.Source", b =>
+            modelBuilder.Entity("TestingApp.Core.Models.Tests.TaskTesting", b =>
                 {
-                    b.HasOne("TestingApp.Core.Models.Identity.User", "Owner")
+                    b.HasOne("TestingApp.Core.Models.Identity.User", "OwnerUser")
                         .WithMany()
-                        .HasForeignKey("OwnerID")
+                        .HasForeignKey("OwnerUserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Owner");
+                    b.Navigation("OwnerUser");
                 });
 
             modelBuilder.Entity("TestingApp.Core.Models.Tests.Test", b =>
                 {
-                    b.HasOne("TestingApp.Core.Models.Identity.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("TestingApp.Core.Models.Tests.TaskTesting", null)
+                        .WithMany("Tests")
+                        .HasForeignKey("TaskTestingID");
+                });
 
-                    b.HasOne("TestingApp.Core.Models.Tests.Source", "Source")
-                        .WithMany()
-                        .HasForeignKey("SourceID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Owner");
-
-                    b.Navigation("Source");
+            modelBuilder.Entity("TestingApp.Core.Models.Tests.TaskTesting", b =>
+                {
+                    b.Navigation("Tests");
                 });
 #pragma warning restore 612, 618
         }

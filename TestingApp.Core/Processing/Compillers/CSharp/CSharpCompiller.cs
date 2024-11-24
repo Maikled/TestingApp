@@ -62,8 +62,8 @@ namespace TestingApp.Core.Processing.CSharp
                             assembly.EntryPoint.Invoke(null, parameters);
                         }
 
-                        var realOutputData = realOutputWriter.ToString();
-                        var expectedOutputData = _testData.OutputData;
+                        var realOutputData = realOutputWriter.ToString().Replace("\r\n", "\n").Trim('\n', '\r');
+                        var expectedOutputData = _testData.OutputData.Replace("\r\n", "\n").Trim('\n', '\r');
                         
                         if (realOutputData != expectedOutputData)
                         {

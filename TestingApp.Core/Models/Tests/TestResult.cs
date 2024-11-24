@@ -3,9 +3,9 @@
     public class TestResult
     {
         public bool IsSuccess { get; }
-        public IEnumerable<string> Errors { get; }
+        public List<string> Errors { get; }
 
-        public TestResult(bool isSuccess, IEnumerable<string> errors)
+        public TestResult(bool isSuccess, List<string> errors)
         {
             IsSuccess = isSuccess;
             Errors = errors;

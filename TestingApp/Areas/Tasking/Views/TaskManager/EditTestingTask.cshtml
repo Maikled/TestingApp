@@ -1,0 +1,302 @@
+﻿@using TestingApp.Core.Models.Tests
+
+@model TaskTesting
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 20px auto;
+        background: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        background: #f9f9f9;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .test-container {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        background-color: #fdfdfd;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .test-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .test-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .remove-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 5px 15px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .remove-btn:hover {
+        background-color: #c0392b;
+    }
+
+    .add-test-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 1rem;
+        margin-top: 20px;
+        display: block;
+        text-align: center;
+        transition: background-color 0.2s ease-in-out;
+        width: 100%;
+    }
+
+    .add-test-btn:hover {
+        background-color: #2980b9;
+    }
+
+    .save-task-btn {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 1rem;
+        margin-top: 20px;
+        width: 100%;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .save-task-btn:hover {
+        background-color: #218838;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: #555;
+        font-weight: bold;
+    }
+</style>
+
+<div class="form-container">
+    <h1>@ViewBag.Title</h1>
+    <form id="creatingTaskForm">
+        <div class="form-group">
+            <label>Название задачи</label>
+            <input type="text" id="taskName" required value="@Model?.Name" />
+        </div>
+        <div class="form-group">
+            <label>Описание задачи</label>
+            <textarea id="taskDescription" rows="3">@Model?.Description</textarea>
+        </div>
+
+        <div class="section-title">Тесты</div>
+        <div id="testsContainer">
+            @if (Model != null)
+            {
+                @foreach (var test in Model.Tests)
+                {
+                    <div class="test-container" id="test-@test.ID">
+                        <div class="test-header">
+                            <h3>Тест #@(Model.Tests.IndexOf(test) + 1)</h3>
+                            <button class="remove-btn" onclick="RemoveTest('@test.ID')">Удалить</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="testName-@test.ID">Название теста:</label>
+                            <input type="text" id="testName-@test.ID" value="@test.Name" onchange="UpdateTest('@test.ID', 'name', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label for="testInput-@test.ID">Входные данные:</label>
+                            <textarea id="testInput-@test.ID" rows="2" onchange="UpdateTest('@test.ID', 'inputData', this.value)">@test.InputData</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="testOutput-@test.ID">Ожидаемые данные:</label>
+                            <textarea id="testOutput-@test.ID" rows="2" onchange="UpdateTest('@test.ID', 'outputData', this.value)">@test.OutputData</textarea>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <button type="button" class="add-test-btn" onclick="AppendTest()">Добавить тест</button>
+
+        <button type="submit" class="save-task-btn">Сохранить задачу</button>
+    </form>
+</div>
+
+<script>
+    let tests = [];
+    @if(Model != null && Model.Tests != null)
+    {
+        <text>
+            tests = @Html.Raw(Json.Serialize(Model.Tests.Select(t => new { id = t.ID, name = t.Name, inputData = t.InputData, outputData = t.OutputData })));
+        </text>
+    }
+
+    function GenerateGUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    function AppendTest() {
+        tests.push({
+            id: GenerateGUID(),
+            name: '',
+            inputData: '',
+            outputData: '',
+        });
+
+        RenderTests();
+    }
+
+    function RenderTests() {
+        const testsContainer = document.getElementById('testsContainer');
+        testsContainer.innerHTML = '';
+
+        tests.forEach((test, index) => {
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test-container';
+            testDiv.innerHTML = `
+                        <div class="test-header">
+                            <h3>Тест #${index + 1}</h3>
+                            <button class="remove-btn" onclick="RemoveTest('${test.id}')">Удалить</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="testName-${test.id}">Название теста:</label>
+                            <input type="text" id="testName-${test.id}" value="${test.name}" oninput="UpdateTest('${test.id}', 'name', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label for="testInput-${test.id}">Входные данные:</label>
+                            <textarea id="testInput-${test.id}" rows="2" oninput="UpdateTest('${test.id}', 'inputData', this.value)">${test.inputData}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="testOutput-${test.id}">Ожидаемые данные:</label>
+                            <textarea id="testOutput-${test.id}" rows="2" oninput="UpdateTest('${test.id}', 'outputData', this.value)">${test.outputData}</textarea>
+                        </div>
+                    `;
+            testsContainer.appendChild(testDiv);
+        });
+    }
+
+    function RemoveTest(id) {
+        tests = tests.filter(test => test.id !== id);
+        RenderTests();
+    }
+
+    function UpdateTest(id, field, value) {
+        const test = tests.find(test => test.id === id);
+        if (test) {
+            test[field] = value;
+        }
+    }
+
+    function ValidateTests() {
+        let isValid = true;
+        tests.forEach(test => {
+            if (!test.name.trim() || !test.inputData.trim() || !test.outputData.trim()) {
+                isValid = false;
+            }
+        });
+        return isValid;
+    }
+
+    document.getElementById('creatingTaskForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        if (!ValidateTests()) {
+            alert('Все поля тестов должны быть заполнены.');
+            return;
+        }
+
+        let user = @Html.Raw(Json.Serialize(ViewBag.CurrentUser));
+
+        const testObjects = tests.map(test => ({
+            ID: test.id,
+            Name: test.name,
+            InputData: test.inputData,
+            OutputData: test.outputData
+        }));
+
+        const task = {
+            ID: GenerateGUID(),
+            OwnerUser: user,
+            Name: document.getElementById('taskName').value,
+            Description: document.getElementById('taskDescription').value,
+            Tests: testObjects
+        };
+
+        try {
+            const response = await fetch('/TaskManager/SaveTask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(task)
+            });
+
+            if (response.ok) {
+                alert('Задача тестирования успешно сохранена!');
+            } else {
+                const error = await response.text();
+                console.error('Ошибка при сохранении:', error);
+                alert('Произошла ошибка при сохранении.');
+            }
+        } catch (error) {
+            console.error('Ошибка при отправке данных:', error);
+            alert('Не удалось отправить данные на сервер.');
+        }
+    });
+</script>

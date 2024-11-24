@@ -1,0 +1,274 @@
+﻿@using TestingApp.Areas.Tasking.Models
+@using TestingApp.Core.Models.Identity.Enums
+
+@model TaskModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .task-view-container {
+        max-width: 800px;
+        margin: 20px auto;
+        background: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: #555;
+        font-weight: bold;
+    }
+
+    .task-description, .task-code, .task-tests {
+        margin-bottom: 20px;
+    }
+
+    .task-description p {
+        font-size: 1rem;
+        color: #666;
+        line-height: 1.5;
+    }
+
+    textarea {
+        width: 100%;
+        height: 150px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 1rem;
+        color: #333;
+        background: #f9f9f9;
+        resize: vertical;
+    }
+
+    .task-tests .test-expander {
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        background: #fdfdfd;
+    }
+
+    .test-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        cursor: pointer;
+        background: #f7f7f7;
+        border-radius: 5px;
+        transition: background 0.2s ease-in-out;
+    }
+
+    .test-header:hover {
+        background: #e9ecef;
+    }
+
+    .run-test-button {
+        background-color: #007bff;
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 3px;
+        font-size: 0.9rem;
+    }
+
+    .run-test-button:hover {
+        background-color: #0056b3;
+    }
+
+    .test-details {
+        display: none;
+        padding: 15px;
+        border-top: 1px solid #ddd;
+    }
+
+    .test-details p {
+        margin: 5px 0;
+        color: #555;
+    }
+
+    .test-details code {
+        background-color: #e9ecef;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 0.95rem;
+    }
+
+    .admin-actions {
+        margin-top: 20px;
+        text-align: center;
+        
+    }
+
+    .admin-actions button {
+        background-color: #28a745;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.2s ease-in-out;
+        width: 100%;
+    }
+
+    .admin-actions button:hover {
+        background-color: #218838;
+    }
+
+    .error-container {
+        color: red;
+        margin-top: 10px;
+    }
+
+    .error-container ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .error-container ul li {
+        font-size: 0.95rem;
+    }
+</style>
+
+<div class="task-view-container">
+    <h1>@Model.Task.Name</h1>
+
+    <div class="task-description">
+        <div class="section-title">Описание:</div>
+        <p>@Model.Task.Description</p>
+    </div>
+
+    <div class="task-code">
+        <div class="section-title">Исходный код:</div>
+        <textarea id="sourceCode" placeholder="Введите здесь ваш код..." oninput="updateSourceCode(event)">@Model.Source?.Code</textarea>
+    </div>
+
+    <div class="task-tests">
+        <div class="section-title">Тесты:</div>
+        @if (Model.Task.Tests.Any())
+        {
+            foreach (var test in Model.Task.Tests.OrderBy(p => p.Name))
+            {
+                var testHistory = Model.TestExecuteHistories.FirstOrDefault(p => p.TestID == test.ID);
+
+                <div class="test-expander" >
+                    <div class="test-header" id="test-expander-@test.ID" onclick="toggleTestDetails('@test.ID')" style="color: @(testHistory?.IsSuccess == true ? "green" : testHistory?.IsSuccess == false ? "red" : "gray")">
+                        <span>@test.Name</span>
+                        <button class="run-test-button" onclick="runTest('@test.ID', event)">Запустить</button>
+                    </div>
+                    <div class="test-details" id="test-details-@test.ID">
+                        <p><strong>Входные данные:</strong> <code>@test.InputData</code></p>
+                        <p><strong>Ожидаемый результат:</strong> <code>@test.OutputData</code></p>
+                        <p><strong>Результат теста:</strong> 
+                            <span id="test-result-@test.ID" style="color: @(testHistory?.IsSuccess == true ? "green" : testHistory?.IsSuccess == false ? "red" : "gray")">@(testHistory?.IsSuccess == true ? "Успешно" : testHistory?.IsSuccess == false ? "Ошибка" : "Не запущен")</span></p>
+                        <div class="error-container" id="error-container-@test.ID">
+                            <ul id="error-list-@test.ID">
+                                @if(testHistory != null)
+                                {
+                                    foreach(var error in testHistory.Errors)
+                                    {
+                                        <li>@error</li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>Тесты отсутствуют.</p>
+        }
+    </div>
+
+    @if (Model.Task.OwnerUser?.RoleType == RoleType.Admin)
+    {
+        <div class="admin-actions">
+            <button onclick="location.href='@Url.RouteUrl(new { controller = "TaskManager", action = "EditTask", area = "Tasking", taskID = Model.Task.ID  })'">Редактировать задачу</button>
+        </div>
+    }
+</div>
+
+<script>
+    function toggleTestDetails(testId) {
+        const details = document.getElementById(`test-details-${testId}`);
+        details.style.display = details.style.display === "none" || details.style.display === "" ? "block" : "none";
+    }
+
+    function runTest(testId, event) {
+        event.stopPropagation();
+        const sourceCode = document.getElementById("sourceCode").value;
+        if (!sourceCode.trim()) {
+            alert("Пожалуйста, введите исходный код перед запуском теста.");
+            return;
+        }
+
+        let source = @Html.Raw(Json.Serialize(Model.Source));
+        source.Code = sourceCode;
+
+        fetch('/TaskManager/RunTest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ TestID: testId, Source: source })
+        })
+            .then(response => response.json())
+            .then(data => {
+                const testExpander = document.getElementById(`test-expander-${testId}`);
+                const resultElement = document.getElementById(`test-result-${testId}`);
+                const errorContainer = document.getElementById(`error-container-${testId}`);
+                const errorList = document.getElementById(`error-list-${testId}`);
+                errorList.innerHTML = "";
+
+                if (data.isSuccess === true) {
+                    resultElement.textContent = "Успешно";
+                    resultElement.style.color = "green";
+                    testExpander.style.color = "green";
+                } else {
+                    resultElement.textContent = "Ошибка";
+                    resultElement.style.color = "red";
+                    testExpander.style.color = "red";
+
+                    data.errors.forEach(error => {
+                        const li = document.createElement("li");
+                        li.textContent = error;
+                        errorList.appendChild(li);
+                    });
+
+                    errorContainer.style.display = "block";
+                }
+            });
+    }
+
+    function updateSourceCode(event) {
+        const updatedCode = event.target.value;
+        const source = @Html.Raw(Json.Serialize(Model.Source));
+
+        if (updatedCode != source.code) {
+            source.code = updatedCode;
+
+            fetch('/TaskManager/UpdateSourceCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(source)
+            });
+        }
+    }
+</script>

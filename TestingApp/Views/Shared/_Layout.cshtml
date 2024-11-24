@@ -3,44 +3,117 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AutoTestingApp</title>
+    <title>Testing App</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/AutoTestingApp.styles.css" asp-append-version="true" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        main {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        footer {
+            margin-top: auto;
+        }
+
+        .navbar-custom {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .navbar-brand-color {
+            color: #000000;
+            font-size: 1.5rem;
+        }
+
+        .footer-custom {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 10px 0;
+        }
+
+        .github-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 15px;
+            color: #ffffff;
+            background-color: #333;
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .github-button svg {
+            fill: currentColor;
+        }
+
+        .github-button:hover {
+            background-color: #444;
+            border-color: #555;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoTestingApp</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container">
+                <a class="navbar-brand navbar-brand-color" href="/Dashboard/General">Testing App</a>
+
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="/profile_picture_icon.svg" width="32" height="32" class="rounded-circle me-2">
+                        <strong>@ViewBag.CurrentUser?.Name</strong>
+                    </a>
+                    <ul class="dropdown-menu text-small shadow">
+                        <li><a class="dropdown-item" href="/Authentication/Logout">Выйти</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - AutoTestingApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer class="footer-custom">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <p class="mb-0 text-muted">&copy; 2024 Testing App</p>
+            </div>
+
+            <div>
+                <a href="https://github.com/Maikled/TestingApp.git" target="_blank" class="github-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.166 6.84 9.49.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.61-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1.01.07 1.54 1.04 1.54 1.04.89 1.52 2.33 1.08 2.9.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.02-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02A9.51 9.51 0 0 1 12 6.8c.85.004 1.71.11 2.5.32 1.91-1.3 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.63.7 1.02 1.59 1.02 2.68 0 3.84-2.34 4.69-4.57 4.93.36.31.68.92.68 1.86 0 1.34-.01 2.42-.01 2.75 0 .27.18.58.69.48A10 10 0 0 0 22 12c0-5.52-4.48-10-10-10z"></path>
+                    </svg>
+                    GitHub
+                </a>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
