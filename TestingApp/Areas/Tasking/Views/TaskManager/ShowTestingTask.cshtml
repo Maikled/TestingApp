@@ -244,7 +244,7 @@
         }
     </div>
 
-    @if (Model.Task.OwnerUser?.RoleType == RoleType.Admin)
+    @if (ViewBag.CurrentUser?.RoleType == RoleType.Admin)
     {
         <div class="admin-actions">
             <button onclick="location.href='@Url.RouteUrl(new { controller = "TaskManager", action = "EditTask", area = "Tasking", taskID = Model.Task.ID  })'">Редактировать задачу</button>
