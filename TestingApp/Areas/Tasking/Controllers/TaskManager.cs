@@ -46,6 +46,18 @@ namespace TestingApp.Areas.Tasking.Controllers
             _databaseContext.Attach(task.OwnerUser);
             if (_databaseContext.Tasks.Any(p => p.ID == task.ID))
             {
+                foreach(var test in task.Tests)
+                {
+                    if(_databaseContext.Tests.Any(p => p.ID == test.ID))
+                    {
+                        _databaseContext.Tests.Update(test);
+                    }
+                    else
+                    {
+                        await _databaseContext.Tests.AddAsync(test);
+                    }
+                }
+
                 _databaseContext.Tasks.Update(task);
             }
             else

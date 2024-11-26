@@ -133,6 +133,7 @@
 <div class="form-container">
     <h1>@ViewBag.Title</h1>
     <form id="creatingTaskForm">
+        <input type="hidden" id="task-id" value="@Model?.ID" />
         <div class="form-group">
             <label>Название задачи</label>
             <input type="text" id="taskName" required value="@Model?.Name" />
@@ -148,6 +149,7 @@
             {
                 @foreach (var test in Model.Tests)
                 {
+                    
                     <div class="test-container" id="test-@test.ID">
                         <div class="test-header">
                             <h3>Тест #@(Model.Tests.IndexOf(test) + 1)</h3>
@@ -271,8 +273,11 @@
             OutputData: test.outputData
         }));
 
+        const taskID = document.getElementById('task-id').value;
+        let id = taskID == "" ? GenerateGUID() : taskID;
+
         const task = {
-            ID: GenerateGUID(),
+            ID: id,
             OwnerUser: user,
             Name: document.getElementById('taskName').value,
             Description: document.getElementById('taskDescription').value,

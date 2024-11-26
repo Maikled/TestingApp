@@ -213,7 +213,7 @@
                             <button id="run-test-button" class="run-test-button" onclick="runTest('@test.ID', event, this)">
                                 Запустить
                             </button>
-                            <div id="progress-ring" class="progress-ring" style="display: none;">
+                            <div id="progress-ring-@test.ID" class="progress-ring" style="display: none;">
                                 <div class="spinner"></div>
                             </div>
                         </div>
@@ -269,10 +269,10 @@
         let source = @Html.Raw(Json.Serialize(Model.Source));
         source.Code = sourceCode;
 
-        const progressRing = document.getElementById('progress-ring');
+        const progressRing = document.getElementById(`progress-ring-${testId}`);
         const runButton = button;
         runButton.style.display = 'none';
-        progressRing.style.display = 'flex';
+        progressRing.style.display = 'inline-block';
 
         fetch('/TaskManager/RunTest', {
             method: 'POST',
