@@ -18,7 +18,7 @@ namespace TestingApp.Core.Processing.CSharp
 
         public TestResult Run()
         {
-            List<string> errors = new List<string>();
+            var errors = new List<string>();
 
             try
             {
@@ -50,24 +50,44 @@ namespace TestingApp.Core.Processing.CSharp
                         memoryStream.Seek(0, SeekOrigin.Begin);
                         var assembly = Assembly.Load(memoryStream.ToArray());
 
-                        var inputReader = new StringReader(_testData.InputData);
-                        
-                        var realOutputWriter = new StringWriter();
+                        var inputReader = new StringReader(_testData.InputData);               
+                        var outputWriter = new StringWriter();
 
-                        replacer.ReplaceIO(assembly, inputReader, realOutputWriter);
+                        replacer.ReplaceIO(assembly, inputReader, outputWriter);
 
                         if (assembly.EntryPoint != null)
                         {
-                            var parameters = assembly.EntryPoint.GetParameters().Length == 0 ? null : new object[] { };
-                            assembly.EntryPoint.Invoke(null, parameters);
-                        }
+                            var args = new List<object>();
+                            foreach(var parameter in assembly.EntryPoint.GetParameters())
+                            {
+                                if (parameter.ParameterType.IsArray)
+                                {
+                                    var elementType = parameter.ParameterType.GetElementType();
+                                    if(elementType != null)
+                                    {
+                                        args.Add(Array.CreateInstance(elementType, 0));
+                                    }
+                                }
+                                else
+                                {
+                                    args.Add(new object());
+                                }
+                            }
 
-                        var realOutputData = realOutputWriter.ToString().Replace("\r\n", "\n").Trim('\n', '\r');
-                        var expectedOutputData = _testData.OutputData.Replace("\r\n", "\n").Trim('\n', '\r');
-                        
-                        if (realOutputData != expectedOutputData)
+                            var finalArgs = args.Count == 0 ? null : args.ToArray();
+                            assembly.EntryPoint.Invoke(null, finalArgs);
+
+                            var realOutputData = outputWriter.ToString().Replace("\r\n", "\n").Trim('\n', '\r');
+                            var expectedOutputData = _testData.OutputData.Replace("\r\n", "\n").Trim('\n', '\r');
+
+                            if (realOutputData != expectedOutputData)
+                            {
+                                throw new Exception($"Тест не пройден. Ожидаемый вывод: \"{expectedOutputData}\", реальный вывод: \"{realOutputData}\"");
+                            }
+                        }
+                        else
                         {
-                            throw new Exception($"Тест не пройден. Ожидаемый вывод: \"{expectedOutputData}\", реальный вывод: \"{realOutputData}\"");
+                            throw new ArgumentNullException("Отсутствует доступная точка входа в программе");
                         }
                     }
                 }
